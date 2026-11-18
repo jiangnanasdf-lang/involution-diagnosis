@@ -1,0 +1,481 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<title>内卷诊断室 · 给"内卷"开一份诊断书</title>
+<style>
+:root{
+  --red:#7A1A1A; --red-deep:#4E0D0D; --red-soft:#A84545; --red-wash:#F3E6E4;
+  --gold:#C4A24A; --gold-lt:#E2C87A; --gold-pale:#F0E4C4;
+  --paper:#F7F1E3; --paper-2:#EFE6D2; --white:#FFFCF6;
+  --ink:#2B2622; --ink-2:#5A524B; --ink-3:#8B8177; --line:#DCD2BC;
+  --serif:"Songti SC","STSong","SimSun","Noto Serif CJK SC","Source Han Serif SC",serif;
+  --sans:"PingFang SC","Microsoft YaHei","Hiragino Sans GB",sans-serif;
+  --sh:0 1px 2px rgba(43,38,34,.04),0 6px 18px rgba(43,38,34,.06),0 18px 40px rgba(43,38,34,.07);
+}
+*{box-sizing:border-box;margin:0;padding:0;-webkit-tap-highlight-color:transparent}
+html{min-height:100%}
+body{
+  font-family:var(--sans);color:var(--ink);min-height:100vh;overflow-x:hidden;
+  background:var(--paper);
+  background-image:
+    radial-gradient(ellipse at 12% 8%,rgba(196,162,74,.13),transparent 45%),
+    radial-gradient(ellipse at 88% 82%,rgba(122,26,26,.08),transparent 42%),
+    url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='180' height='180'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='180' height='180' filter='url(%23n)' opacity='.045'/%3E%3C/svg%3E");
+}
+/* 背景漂浮装饰 */
+.bg-deco{position:fixed;inset:0;pointer-events:none;z-index:0;overflow:hidden}
+.bg-deco i{position:absolute;display:block;border:1px solid rgba(196,162,74,.22);border-radius:50%}
+.bg-deco i:nth-child(1){width:420px;height:420px;left:-190px;top:-140px;animation:float1 16s ease-in-out infinite}
+.bg-deco i:nth-child(2){width:280px;height:280px;right:-120px;bottom:6%;animation:float2 20s ease-in-out infinite}
+.bg-deco i:nth-child(3){width:150px;height:150px;right:12%;top:18%;border-style:dashed;animation:float1 24s ease-in-out infinite reverse}
+.bg-deco b{position:absolute;width:5px;height:5px;background:var(--gold);transform:rotate(45deg);opacity:.5}
+.bg-deco b:nth-of-type(1){left:9%;top:44%}
+.bg-deco b:nth-of-type(2){right:11%;top:60%}
+.bg-deco b:nth-of-type(3){left:24%;bottom:12%}
+@keyframes float1{0%,100%{transform:translate(0,0)}50%{transform:translate(24px,32px)}}
+@keyframes float2{0%,100%{transform:translate(0,0)}50%{transform:translate(-28px,-24px)}}
+
+#app{position:relative;z-index:1;width:100%;max-width:720px;min-height:100vh;margin:0 auto;padding:0 24px 72px}
+.screen{display:none}
+.screen.active{display:block;animation:screenIn .55s cubic-bezier(.22,1,.36,1) both}
+@keyframes screenIn{from{opacity:0;transform:translateY(20px) scale(.99)}to{opacity:1;transform:none}}
+.up{animation:up .55s cubic-bezier(.22,1,.36,1) both}
+@keyframes up{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:none}}
+
+/* ---------- 装饰件 ---------- */
+.eyebrow{
+  font-family:var(--sans);font-size:10px;letter-spacing:3.5px;color:var(--red-soft);
+  text-transform:uppercase;font-weight:700;
+}
+.rule{display:flex;align-items:center;gap:10px;justify-content:center;margin:18px 0}
+.rule:before,.rule:after{content:"";height:1px;flex:1;max-width:110px;background:linear-gradient(90deg,transparent,var(--gold))}
+.rule:after{background:linear-gradient(90deg,var(--gold),transparent)}
+.rule .diamond{width:7px;height:7px;background:var(--gold);transform:rotate(45deg);flex:none}
+.rule.sm{margin:12px 0}
+.gold-grad{background:linear-gradient(120deg,#9E7C24,#E6CE86 45%,#B48F2F);-webkit-background-clip:text;background-clip:text;color:transparent}
+
+/* ---------- 按钮 ---------- */
+.btn{
+  position:relative;overflow:hidden;display:inline-flex;align-items:center;justify-content:center;gap:12px;
+  background:var(--red);color:#fff;border:1px solid var(--red-deep);border-radius:3px;
+  font-family:var(--sans);font-size:15px;font-weight:600;letter-spacing:3px;
+  padding:16px 44px;cursor:pointer;box-shadow:var(--sh);transition:.28s cubic-bezier(.22,1,.36,1);
+}
+.btn:before{
+  content:"";position:absolute;inset:2px;border:1px solid rgba(226,200,122,.42);border-radius:2px;pointer-events:none;
+}
+.btn:after{
+  content:"";position:absolute;top:0;left:-60%;width:45%;height:100%;
+  background:linear-gradient(90deg,transparent,rgba(255,255,255,.22),transparent);
+  transform:skewX(-22deg);transition:.6s;
+}
+.btn:hover{background:var(--red-deep);transform:translateY(-3px);box-shadow:0 12px 30px rgba(122,26,26,.3)}
+.btn:hover:after{left:120%}
+.btn:active{transform:translateY(0)}
+.btn .arrow{transition:transform .28s}
+.btn:hover .arrow{transform:translateX(5px)}
+.btn.ghost{background:transparent;color:var(--red);border:1px solid var(--red);box-shadow:none}
+.btn.ghost:before{border-color:rgba(122,26,26,.18)}
+.btn.ghost:hover{background:rgba(122,26,26,.05);box-shadow:none}
+.btn.sm{padding:12px 26px;font-size:13px;letter-spacing:1.5px}
+
+/* ---------- 欢迎页 ---------- */
+#welcome{padding-top:clamp(34px,8vh,76px);text-align:center}
+#welcome .eyebrow{margin-bottom:8px}
+.w-title{
+  font-family:var(--serif);font-size:clamp(44px,11vw,66px);font-weight:700;
+  color:var(--red);letter-spacing:9px;line-height:1.25;text-indent:9px;
+  text-shadow:0 2px 0 rgba(255,255,255,.7);
+}
+.w-sub{font-family:var(--serif);font-size:clamp(15px,3.8vw,19px);color:var(--gold);letter-spacing:4px;margin-top:4px}
+.w-sub-en{font-size:10px;letter-spacing:4px;color:var(--ink-3);margin-top:8px;text-transform:uppercase}
+.lead{
+  max-width:500px;margin:24px auto 30px;font-family:var(--serif);font-size:15px;
+  line-height:2.15;color:var(--ink-2);letter-spacing:.5px;
+}
+.doc{
+  width:258px;height:158px;margin:0 auto 34px;background:var(--white);
+  border:1px solid var(--line);border-radius:3px;position:relative;
+  box-shadow:var(--sh);transform:rotate(-2.4deg);padding:18px 20px;text-align:left;overflow:hidden;
+}
+.doc:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--red)}
+.doc:after{
+  content:"";position:absolute;inset:5px;border:1px solid rgba(196,162,74,.28);border-radius:2px;pointer-events:none;
+}
+.doc .d-no{font-size:9px;letter-spacing:2px;color:var(--ink-3)}
+.doc .d-h{font-family:var(--serif);font-size:15px;color:var(--red);letter-spacing:3px;margin-top:4px;font-weight:700}
+.doc .d-l{height:5px;background:var(--paper-2);border-radius:3px;margin-top:11px}
+.doc .d-l.s{width:62%}
+.doc .d-l.x{width:80%}
+.seal{
+  position:absolute;right:12px;bottom:8px;width:70px;height:70px;border:2px solid var(--red);
+  border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--red);
+  font-family:var(--serif);font-size:13px;font-weight:700;letter-spacing:1px;line-height:1.25;text-align:center;
+  transform:rotate(14deg);opacity:.82;
+}
+.seal:after{content:"";position:absolute;inset:4px;border:1px solid var(--red);border-radius:50%}
+.w-feats{display:flex;justify-content:center;gap:20px;margin-top:24px;flex-wrap:wrap}
+.w-feats span{font-size:11px;letter-spacing:2px;color:var(--ink-3)}
+.w-feats span:before{content:"◆";color:var(--gold);font-size:8px;margin-right:7px;vertical-align:2px}
+
+/* ---------- 答题页 ---------- */
+#quiz{padding-top:clamp(22px,5vh,44px)}
+.q-top{display:flex;justify-content:space-between;align-items:flex-end;margin-bottom:10px}
+.q-chapter{display:flex;flex-direction:column;gap:4px}
+.q-chapter .eyebrow{color:var(--gold)}
+.q-chapter .name{font-family:var(--serif);font-size:15px;color:var(--red);letter-spacing:2px;font-weight:700}
+.q-count{font-family:var(--serif);font-size:13px;color:var(--ink-3);letter-spacing:1px}
+.q-count b{font-size:26px;color:var(--red);font-weight:700}
+.q-count i{font-style:normal;color:var(--line);margin:0 3px}
+.progress{height:3px;background:var(--paper-2);border-radius:2px;overflow:hidden;margin-bottom:7px}
+.progress i{display:block;height:100%;width:0;background:linear-gradient(90deg,var(--red),var(--gold));transition:width .6s cubic-bezier(.22,1,.36,1)}
+.dots{display:flex;justify-content:space-between;margin-bottom:30px}
+.dots em{width:7px;height:7px;border-radius:50%;background:var(--paper-2);border:1px solid var(--line);transition:.4s}
+.dots em.on{background:var(--red);border-color:var(--red);box-shadow:0 0 0 4px rgba(122,26,26,.1)}
+.dots em.now{border-color:var(--gold);background:var(--gold)}
+.q-text{
+  font-family:var(--serif);font-size:clamp(19px,4.8vw,25px);line-height:1.72;font-weight:700;
+  color:var(--ink);margin-bottom:6px;min-height:88px;
+}
+.q-hint{font-size:12px;color:var(--ink-3);letter-spacing:1px;margin-bottom:22px}
+.options{display:flex;flex-direction:column;gap:11px}
+.opt{
+  position:relative;display:flex;align-items:center;gap:15px;width:100%;text-align:left;
+  background:var(--white);border:1px solid var(--line);border-radius:3px;
+  padding:15px 17px;font-family:var(--sans);font-size:14.5px;color:var(--ink-2);
+  cursor:pointer;transition:.26s cubic-bezier(.22,1,.36,1);line-height:1.55;
+}
+.opt:before{content:"";position:absolute;left:-1px;top:12px;bottom:12px;width:2px;background:var(--gold);transform:scaleY(0);transition:.26s}
+.opt:hover{border-color:var(--red-soft);transform:translateX(5px);box-shadow:0 6px 18px rgba(122,26,26,.09);color:var(--ink)}
+.opt:hover:before{transform:scaleY(1)}
+.opt .key{
+  flex:none;width:31px;height:31px;border-radius:50%;border:1px solid var(--gold);
+  color:var(--red);display:flex;align-items:center;justify-content:center;
+  font-family:var(--serif);font-weight:700;font-size:14px;transition:.26s;
+}
+.opt .check{margin-left:auto;opacity:0;transform:scale(.5);color:#fff;transition:.3s .1s;font-size:16px}
+.opt.picked{background:var(--red);border-color:var(--red-deep);color:#fff;box-shadow:0 10px 26px rgba(122,26,26,.24)}
+.opt.picked .key{background:var(--white);color:var(--red);border-color:var(--white)}
+.opt.picked .check{opacity:1;transform:scale(1)}
+.opt.fade{opacity:.38;pointer-events:none;transform:none!important;box-shadow:none!important}
+.q-foot{text-align:center;font-size:11px;color:var(--ink-3);letter-spacing:2px;margin-top:26px}
+
+/* ---------- 分析中 ---------- */
+#analyzing{padding-top:clamp(50px,13vh,120px);text-align:center}
+.scanner{width:136px;height:136px;margin:0 auto 32px;position:relative;display:flex;align-items:center;justify-content:center}
+.scanner .o1{position:absolute;inset:0;border:1px solid var(--gold);border-radius:50%;opacity:.55}
+.scanner .o2{position:absolute;inset:13px;border:1px dashed var(--red-soft);border-radius:50%;animation:spin 9s linear infinite}
+.scanner .o3{position:absolute;inset:27px;border:1px solid var(--line);border-radius:50%}
+.scanner .sweep{position:absolute;inset:0;border-radius:50%;overflow:hidden}
+.scanner .sweep:after{
+  content:"";position:absolute;left:50%;top:50%;width:50%;height:50%;
+  background:conic-gradient(from 0deg,rgba(196,162,74,.35),transparent 55%);
+  transform-origin:0 0;animation:spin 2.2s linear infinite;
+}
+.scanner .core{
+  position:relative;z-index:2;font-family:var(--serif);font-size:14px;color:var(--red);letter-spacing:3px;
+  background:var(--paper);padding:7px 11px;border-radius:2px;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.an-lines{max-width:340px;margin:0 auto;text-align:left}
+.an-lines p{font-family:var(--serif);font-size:14px;color:var(--ink-2);letter-spacing:1px;margin:11px 0;opacity:0;animation:pop .5s ease forwards}
+.an-lines p:before{content:"◈";color:var(--gold);margin-right:10px;font-size:11px}
+@keyframes pop{to{opacity:1;transform:none}}
+.an-lines p{transform:translateX(-8px)}
+
+/* ---------- 结果页 ---------- */
+#result{padding-top:clamp(18px,4vh,34px)}
+.res-head{display:flex;justify-content:space-between;align-items:flex-start;margin-bottom:16px}
+.res-meta{display:flex;flex-direction:column;gap:5px}
+.res-meta .eyebrow{color:var(--gold)}
+.res-meta b{font-family:var(--serif);font-size:15px;color:var(--red);letter-spacing:2px}
+.res-meta small{font-size:11px;color:var(--ink-3);letter-spacing:1px}
+.res-stamp{
+  width:82px;height:82px;position:relative;border:2px solid var(--red);border-radius:50%;
+  display:flex;flex-direction:column;align-items:center;justify-content:center;
+  color:var(--red);font-family:var(--serif);font-weight:700;font-size:15px;letter-spacing:2px;
+  opacity:0;transform:rotate(-16deg) scale(1.7);
+}
+.res-stamp:before{content:"";position:absolute;inset:4px;border:1px solid var(--red);border-radius:50%}
+.res-stamp.show{animation:stampIn .5s cubic-bezier(.2,1.5,.4,1) forwards}
+@keyframes stampIn{to{opacity:.85;transform:rotate(-16deg) scale(1)}}
+
+.report{
+  background:var(--white);border:1px solid var(--line);border-radius:4px;
+  padding:clamp(20px,5vw,34px);box-shadow:var(--sh);position:relative;overflow:hidden;
+}
+.report:before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--red)}
+.report:after{content:"";position:absolute;right:14px;top:14px;bottom:14px;width:1px;background:linear-gradient(var(--gold-pale),transparent 60%);pointer-events:none}
+.score-wrap{display:flex;align-items:center;gap:clamp(18px,5vw,32px);flex-wrap:wrap}
+.ring{position:relative;width:158px;height:158px;flex:none;margin:0 auto}
+.ring svg{transform:rotate(-90deg)}
+.ring .ticks{position:absolute;inset:0}
+.ring .ticks i{position:absolute;left:50%;top:50%;width:1px;height:6px;background:var(--line);transform-origin:50% 73px}
+.ring .val{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center}
+.ring .val b{font-family:var(--serif);font-size:46px;line-height:1;color:var(--red)}
+.ring .val small{font-size:10px;letter-spacing:3px;color:var(--ink-3);margin-top:7px}
+.level-box{flex:1;min-width:200px}
+.level-name{font-family:var(--serif);font-size:clamp(20px,5.2vw,27px);font-weight:700;color:var(--red);line-height:1.45;letter-spacing:1px}
+.level-en{font-size:10px;letter-spacing:3px;color:var(--gold);margin-top:7px;text-transform:uppercase}
+.level-desc{font-family:var(--serif);font-size:14px;line-height:1.9;color:var(--ink-2);margin-top:14px}
+.sec{margin-top:22px;border-top:1px solid var(--line);padding-top:18px;position:relative}
+.sec:before{content:"";position:absolute;top:-1px;left:0;width:44px;height:2px;background:var(--gold)}
+.sec h3{font-family:var(--serif);font-size:14px;color:var(--red);letter-spacing:3px;margin-bottom:10px;font-weight:700}
+.sec h3 span{font-family:var(--sans);font-size:9px;color:var(--ink-3);letter-spacing:2px;margin-left:8px;font-weight:400}
+.quote{
+  background:var(--paper);border-left:3px solid var(--red);padding:14px 16px;
+  font-family:var(--serif);font-size:13.5px;line-height:1.95;color:var(--ink-2);position:relative;
+}
+.quote:before{content:"\201C";position:absolute;left:8px;top:-4px;font-family:var(--serif);font-size:30px;color:var(--gold-pale)}
+.rx{list-style:none;counter-reset:rx}
+.rx li{
+  counter-increment:rx;position:relative;padding:11px 14px 11px 46px;margin:8px 0;
+  background:var(--paper);border:1px solid var(--line);border-radius:2px;
+  font-size:13.5px;line-height:1.7;color:var(--ink-2);
+}
+.rx li:before{
+  content:counter(rx,decimal-leading-zero);position:absolute;left:12px;top:11px;
+  font-family:var(--serif);font-size:17px;color:var(--red);font-weight:700;
+}
+.rx li:after{content:"";position:absolute;left:39px;top:13px;bottom:13px;width:1px;background:var(--line)}
+.disclaimer{font-size:10.5px;color:var(--ink-3);text-align:center;margin-top:22px;line-height:1.8;letter-spacing:.5px}
+.result-actions{display:flex;gap:12px;justify-content:center;flex-wrap:wrap;margin-top:24px}
+.toast{
+  position:fixed;left:50%;bottom:34px;transform:translateX(-50%) translateY(18px);
+  background:var(--ink);color:#fff;padding:11px 24px;border-radius:2px;font-size:13px;letter-spacing:1px;
+  opacity:0;transition:.32s;pointer-events:none;z-index:99;box-shadow:var(--sh)
+}
+.toast.show{opacity:1;transform:translateX(-50%) translateY(0)}
+.delay1{animation-delay:.12s}.delay2{animation-delay:.24s}.delay3{animation-delay:.36s}.delay4{animation-delay:.48s}
+
+@media(max-width:480px){
+  #app{padding:0 16px 52px}
+  .opt{font-size:13.5px;padding:13px 14px}
+  .score-wrap{justify-content:center;text-align:center}
+  .level-desc{text-align:left}
+  .ring{margin:0 auto}
+  .q-text{min-height:auto}
+  .res-stamp{width:66px;height:66px;font-size:12px}
+}
+@media(prefers-reduced-motion:reduce){*{animation-duration:.01ms!important;transition-duration:.01ms!important}}
+</style>
+</head>
+<body>
+<div class="bg-deco"><i></i><i></i><i></i><b></b><b></b><b></b></div>
+<div id="app">
+
+  <!-- 欢迎页 -->
+  <section id="welcome" class="screen active">
+    <div class="up"><div class="eyebrow">Marxist Perspective · Interactive Diagnosis</div></div>
+    <h1 class="w-title up delay1">内卷诊断室</h1>
+    <div class="w-sub up delay2">给"内卷"开一份诊断书</div>
+    <div class="w-sub-en up delay2">A Diagnosis of Involution</div>
+    <div class="rule sm up delay3"><span class="diamond"></span></div>
+    <p class="lead up delay3">如果内卷是一种病，你的症状有多重？<br>回答六道情境题，我们借马克思的"手术刀"，<br>为你写出一份私人诊断书。</p>
+    <div class="doc up delay4">
+      <div class="d-no">CASE No. 2026-000</div>
+      <div class="d-h">诊 断 书</div>
+      <div class="d-l"></div>
+      <div class="d-l x"></div>
+      <div class="d-l s"></div>
+      <div class="d-l"></div>
+      <div class="seal">已确诊</div>
+    </div>
+    <div class="up delay4"><button class="btn" onclick="startQuiz()">开始诊断 <span class="arrow">→</span></button></div>
+    <div class="w-feats up delay4"><span>六道情境题</span><span>约一分钟</span><span>即时生成报告</span></div>
+  </section>
+
+  <!-- 答题页 -->
+  <section id="quiz" class="screen">
+    <div class="q-top">
+      <div class="q-chapter"><span class="eyebrow" id="chapterEn">01 · INTAKE</span><span class="name" id="chapter">接诊 · 临床表现</span></div>
+      <div class="q-count"><b id="qNow">01</b><i>/</i>06</div>
+    </div>
+    <div class="progress"><i id="bar"></i></div>
+    <div class="dots" id="dots"></div>
+    <div class="q-text" id="qText"></div>
+    <div class="q-hint">请选择最符合你真实状态的选项</div>
+    <div class="options" id="options"></div>
+    <div class="q-foot">凭第一直觉作答，结果更准确</div>
+  </section>
+
+  <!-- 分析中 -->
+  <section id="analyzing" class="screen">
+    <div class="scanner"><span class="o1"></span><span class="o2"></span><span class="o3"></span><span class="sweep"></span><span class="core">分析中</span></div>
+    <div class="an-lines">
+      <p style="animation-delay:.1s">正在读取你的症状</p>
+      <p style="animation-delay:.6s">比对四张病理切片</p>
+      <p style="animation-delay:1.1s">匹配马克思诊断结论</p>
+      <p style="animation-delay:1.6s">正在生成诊断书</p>
+    </div>
+  </section>
+
+  <!-- 结果页 -->
+  <section id="result" class="screen">
+    <div class="res-head up">
+      <div class="res-meta">
+        <span class="eyebrow">Diagnosis Report</span>
+        <b id="caseId">MZ-2026-0000</b>
+        <small id="dateStr">2026 · 11 · 18</small>
+      </div>
+      <div class="res-stamp" id="stamp">已确诊</div>
+    </div>
+    <div class="report up delay1">
+      <div class="score-wrap">
+        <div class="ring">
+          <div class="ticks" id="ticks"></div>
+          <svg width="158" height="158" viewBox="0 0 158 158">
+            <circle cx="79" cy="79" r="66" fill="none" stroke="#EFE6D2" stroke-width="9"/>
+            <circle id="ringFg" cx="79" cy="79" r="66" fill="none" stroke="#7A1A1A"
+              stroke-width="9" stroke-linecap="round" stroke-dasharray="414.7" stroke-dashoffset="414.7"
+              style="transition:stroke-dashoffset 1.5s cubic-bezier(.22,1,.36,1)"/>
+          </svg>
+          <div class="val"><b id="scoreNum">0</b><small>内卷指数</small></div>
+        </div>
+        <div class="level-box">
+          <div class="level-name" id="levelName"></div>
+          <div class="level-en" id="levelEn"></div>
+          <div class="level-desc" id="levelDesc"></div>
+        </div>
+      </div>
+      <div class="sec up delay2">
+        <h3>病理分析 <span>Pathology · Marxist View</span></h3>
+        <div class="quote" id="pathology"></div>
+      </div>
+      <div class="sec up delay3">
+        <h3>三剂处方 <span>Prescription</span></h3>
+        <ol class="rx" id="rx"></ol>
+      </div>
+    </div>
+    <div class="disclaimer up delay4">本测试为《给"内卷"开一份诊断书》课题展示的互动设计，<br>借用了马克思主义的分析视角，非专业心理或医学测评。</div>
+    <div class="result-actions up delay4">
+      <button class="btn ghost sm" onclick="restart()">重新诊断</button>
+      <button class="btn sm" onclick="copyReport()">复制诊断书</button>
+    </div>
+  </section>
+
+</div>
+<div class="toast" id="toast"></div>
+
+<script>
+const QUESTIONS=[
+  {ch:'01 · INTAKE',name:'接诊 · 临床表现',q:'深夜十一点，你还在刷手机——其实并不困，只是不想睡，因为"睡了就输了"。这种情况对你来说？',opts:[
+    ['早就睡了，身体是革命的本钱',0],
+    ['偶尔如此，第二天会有点后悔',1],
+    ['经常，明知没意义但停不下来',2],
+    ['几乎每天，这叫"报复性熬夜"',3]]},
+  {ch:'01 · INTAKE',name:'接诊 · 临床表现',q:'看到同学又考下一个证、同事又多加了两天班，你的第一反应是？',opts:[
+    ['替他高兴，然后按自己的节奏走',0],
+    ['有点焦虑，但想想自己也在努力',1],
+    ['赶紧查这证有啥用，我是不是也该考',2],
+    ['立刻跟上，不然就要被淘汰了',3]]},
+  {ch:'02 · DIAGNOSIS',name:'诊断 · 剩余劳动',q:'一周里你的 working hours 通常是？',opts:[
+    ['到点就走，工作和生活分得很清',0],
+    ['偶尔加班，确实是因为事情没做完',1],
+    ['经常自愿加班，怕显得不够努力',2],
+    ['"表演式加班"是常态，在场比产出重要',3]]},
+  {ch:'02 · DIAGNOSIS',name:'诊断 · 异化劳动',q:'一天工作结束，你通常感觉？',opts:[
+    ['还有精力，能做点自己喜欢的事',0],
+    ['有点累，但还能出去逛逛',1],
+    ['只想躺着，什么都不想干',2],
+    ['被彻底掏空，感觉自己只是个工具',3]]},
+  {ch:'02 · DIAGNOSIS',name:'诊断 · 商品拜物教',q:'你主要用什么来衡量自己的价值？',opts:[
+    ['我做了什么、我是一个什么样的人',0],
+    ['偶尔会在意薪资和职级',1],
+    ['主要是 offer、学历、薪资这些硬指标',2],
+    ['完全被 KPI 和排名定义，数字就是我',3]]},
+  {ch:'03 · MECHANISM',name:'病理机制 · 囚徒困境',q:'如果有一天所有人都不卷了，你觉得？',opts:[
+    ['那太好了，大家都能好好生活',0],
+    ['挺向往的，但感觉不太现实',1],
+    ['不敢想，我不卷就会被淘汰',2],
+    ['不可能，竞争本来就是人的本性',3]]}
+];
+
+const LEVELS=[
+  {max:4,name:'轻度卷化 · 清醒的旁观者',en:'MILD · KEEP YOUR PACE',
+   desc:'你大多能守住自己的步调，内卷的浪潮尚未完全裹挟你。你清楚努力的意义，也懂得为生活留出空间。',
+   pathology:'从马克思的视角看，你尚未被异化劳动彻底支配，劳动对你而言仍保留着自我实现的可能。但要警惕：产业后备军的压力始终存在，"躺平"与"内卷"都不是真正的出路——真正的出路是人的自由全面发展。',
+   rx:['把精力投到创造性劳动中，而非存量争夺；','建立多元的自我评价体系，不被单一成功叙事绑架；','保持对结构的清醒认知，也关照身边人的处境。']},
+  {max:9,name:'中度卷化 · 身不由己的赶路人',en:'MODERATE · BETWEEN CLARITY AND ANXIETY',
+   desc:'你时而清醒、时而焦虑。明知有些竞争没有意义，却仍忍不住跟进；加班、考证、比较，占据了你不少心力。',
+   pathology:'这是一次典型的"异化"体验：你的劳动时间部分被资本增殖逻辑吸收，剩余劳动侵蚀了必要劳动，休息变成了奢侈。你隐约感到"努力像是在为别人做嫁衣"，却难以抽身——这正是马克思在《1844年经济学哲学手稿》中批判的劳动异化。',
+   rx:['分清"真努力"与"表演式努力"，把时间还给生活；','用技能升级或创新开辟新赛道，避开同质化厮杀；','找回劳动之外的自我，重建多元价值坐标。']},
+  {max:14,name:'重度卷化 · 高速运转的陀螺',en:'SEVERE · CANNOT STOP, DARE NOT STOP',
+   desc:'你已被卷入高速运转的轨道。疲惫成为常态，生活被工作全面殖民，"在场"比"产出"更重要。',
+   pathology:'你的处境集中体现了四重诊断：异化劳动让你与劳动成果分离；剩余劳动无限侵蚀必要劳动；产业后备军的压力迫使你接受更差的条件；商品拜物教把你简化为一串可比较的指标。这是一场没有赢家的囚徒困境——个体最优相加，并不等于集体最优。',
+   rx:['发展生产力：从"分蛋糕"转向"做大蛋糕"，用创新打开增量；','调整生产关系：争取合理工时与多元评价，让劳动更有尊严；','克服异化：找回人的全面发展，让工作回归创造。']},
+  {max:18,name:'极重度卷化 · 内卷重症患者',en:'CRITICAL · RECLAIM YOURSELF FIRST',
+   desc:'警报拉响。你的时间、精力乃至自我认同，几乎全部献给了这场无休止的排序。你清楚地感到被掏空，却只能继续。',
+   pathology:'这是异化劳动最尖锐的形态——劳动从谋生手段彻底沦为外在强制，人的本质被压缩为"指标"。商品拜物教下，人与人之间的关系完全表现为物与物之间的关系。但请记住：这不是你一个人的错，而是结构性问题——马克思主义的当代价值，正在于教我们看清症状背后的根源。',
+   rx:['先自救：夺回休息权，重建被殖民的生活世界；','再辨识：看穿"努力就能成功"的神话与真实的结构约束；','共同改变：改变世界，从改变我们共同创造的规则开始。']}
+];
+
+let idx=0,total=0,locked=false,reportText='';
+function show(id){document.querySelectorAll('.screen').forEach(s=>s.classList.remove('active'));document.getElementById(id).classList.add('active');window.scrollTo(0,0)}
+function startQuiz(){idx=0;total=0;renderQuestion();show('quiz')}
+
+function renderQuestion(){
+  locked=false;
+  const q=QUESTIONS[idx];
+  document.getElementById('chapter').textContent=q.name;
+  document.getElementById('chapterEn').textContent=q.ch;
+  document.getElementById('qNow').textContent=String(idx+1).padStart(2,'0');
+  document.getElementById('bar').style.width=(idx/QUESTIONS.length*100)+'%';
+  const d=document.getElementById('dots');d.innerHTML='';
+  QUESTIONS.forEach((_,i)=>{const e=document.createElement('em');if(i<idx)e.className='on';else if(i===idx)e.className='now';d.appendChild(e)});
+  const t=document.getElementById('qText');t.textContent=q.q;t.classList.remove('up');void t.offsetWidth;t.classList.add('up');
+  const box=document.getElementById('options');box.innerHTML='';
+  q.opts.forEach((o,i)=>{
+    const b=document.createElement('button');b.className='opt';
+    b.style.animation='up .45s cubic-bezier(.22,1,.36,1) '+(i*55)+'ms both';
+    b.innerHTML='<span class="key">'+'ABCD'[i]+'</span><span>'+o[0]+'</span><span class="check">✓</span>';
+    b.onclick=()=>pick(i,o[1],b);box.appendChild(b);
+  });
+}
+function pick(i,score,btn){
+  if(locked)return;locked=true;total+=score;
+  document.querySelectorAll('.opt').forEach((el,j)=>{if(j===i)el.classList.add('picked');else el.classList.add('fade')});
+  setTimeout(()=>{
+    idx++;
+    if(idx<QUESTIONS.length)renderQuestion();
+    else{document.getElementById('bar').style.width='100%';document.querySelectorAll('#dots em').forEach(e=>e.className='on');show('analyzing');setTimeout(showResult,2400)}
+  },540);
+}
+function showResult(){
+  const pct=Math.round(total/18*100);
+  let lv=LEVELS[3];for(const L of LEVELS){if(total<=L.max){lv=L;break}}
+  const cid='MZ-2026-'+String(Math.floor(Math.random()*9000)+1000);
+  document.getElementById('caseId').textContent=cid;
+  const d=new Date();document.getElementById('dateStr').textContent=d.getFullYear()+' · '+String(d.getMonth()+1).padStart(2,'0')+' · '+String(d.getDate()).padStart(2,'0');
+  document.getElementById('levelName').textContent=lv.name;
+  document.getElementById('levelEn').textContent=lv.en;
+  document.getElementById('levelDesc').textContent=lv.desc;
+  document.getElementById('pathology').textContent=lv.pathology;
+  const ol=document.getElementById('rx');ol.innerHTML='';lv.rx.forEach(t=>{const li=document.createElement('li');li.textContent=t;ol.appendChild(li)});
+  // 环刻度
+  const tk=document.getElementById('ticks');tk.innerHTML='';
+  for(let i=0;i<36;i++){const s=document.createElement('i');s.style.transform='rotate('+(i*10)+'deg)';tk.appendChild(s)}
+  // 圆环
+  const C=2*Math.PI*66,ring=document.getElementById('ringFg');
+  ring.setAttribute('stroke-dasharray',C.toFixed(1));ring.setAttribute('stroke-dashoffset',C.toFixed(1));
+  setTimeout(()=>ring.setAttribute('stroke-dashoffset',(C*(1-pct/100)).toFixed(1)),100);
+  // 数字
+  const num=document.getElementById('scoreNum'),st=performance.now();
+  (function step(t){const p=Math.min((t-st)/1300,1);num.textContent=Math.round(pct*(1-Math.pow(1-p,3)));if(p<1)requestAnimationFrame(step)})(performance.now());
+  // 印章
+  const sp=document.getElementById('stamp');sp.classList.remove('show');void sp.offsetWidth;sp.classList.add('show');
+  reportText='【内卷诊断书 · '+cid+'】\n内卷指数：'+pct+' / 100\n诊断结果：'+lv.name+'\n\n症状：'+lv.desc+'\n\n病理分析（马克思视角）：'+lv.pathology+'\n\n处方：\n'+lv.rx.map((t,i)=>(i+1)+'. '+t).join('\n')+'\n\n—— 给"内卷"开一份诊断书 · 马克思主义基本原理课题展示';
+  show('result');
+}
+function restart(){show('welcome')}
+function toast(m){const t=document.getElementById('toast');t.textContent=m;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),2000)}
+function copyReport(){
+  if(navigator.clipboard&&window.isSecureContext)navigator.clipboard.writeText(reportText).then(()=>toast('诊断书已复制 ✓')).catch(fallback);
+  else fallback();
+  function fallback(){const ta=document.createElement('textarea');ta.value=reportText;ta.style.position='fixed';ta.style.opacity='0';document.body.appendChild(ta);ta.select();try{document.execCommand('copy');toast('诊断书已复制 ✓')}catch(e){toast('复制失败，请长按选择文字')}document.body.removeChild(ta)}
+}
+</script>
+</body>
+</html>
